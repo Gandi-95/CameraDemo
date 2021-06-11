@@ -1,0 +1,2 @@
+include ':app', ':glsurfacedemo'
+rootProject.name='CameraDemo'
