@@ -7,19 +7,25 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
 /**
- * @ClassName: Triangle
+ * @ClassName: TriangleMatrix
  * @Description: TODO
  * @Author: gandi
- * @CreateDate: 2021/6/9 11:20
+ * @CreateDate: 2021/6/15 19:49
  * @UpdateRemark:
  * @Version:
  */
-public class Triangle {
+public class TriangleMatrix {
 
     private final String vertexShaderCode =
-            "attribute vec4 vPosition;" +
+            // This matrix member variable provides a hook to manipulate
+            // the coordinates of the objects that use this vertex shader
+            "uniform mat4 uMVPMatrix;" +
+                    "attribute vec4 vPosition;" +
                     "void main() {" +
-                    "  gl_Position = vPosition;" +
+                    // the matrix must be included as a modifier of gl_Position
+                    // Note that the uMVPMatrix factor *must be first* in order
+                    // for the matrix multiplication product to be correct.
+                    "  gl_Position = uMVPMatrix * vPosition;" +
                     "}";
 
     private final String fragmentShaderCode =
@@ -48,7 +54,9 @@ public class Triangle {
     private final int vertexCount = triangleCoords.length / COORDS_PER_VERTEX;
     private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
 
-    public Triangle() {
+    private int vPMatrixHandle;
+
+    public TriangleMatrix() {
         //初始化形状坐标的顶点字节缓冲区 (坐标值的数量 * 每个浮点数 4 个字节)
         ByteBuffer bb = ByteBuffer.allocateDirect(triangleCoords.length*4);
         //使用设备硬件的本机字节顺序
@@ -67,7 +75,7 @@ public class Triangle {
 
     }
 
-    public void draw(){
+    public void draw(float[] mvpMatrix){
         //将程序添加到 OpenGL ES 环境
         GLES20.glUseProgram(mProgram);
         //获取顶点着色器的 vPosition 成员的句柄
@@ -75,13 +83,25 @@ public class Triangle {
         //启用三角形顶点的句柄
         GLES20.glEnableVertexAttribArray(positionHandle);
         //准备三角坐标数据
-        GLES20.glVertexAttribPointer(positionHandle, COORDS_PER_VERTEX,
-                GLES20.GL_FLOAT, false,
-                vertexStride, vertexBuffer);
+        GLES20.glVertexAttribPointer(positionHandle, COORDS_PER_VERTEX,GLES20.GL_FLOAT, false,vertexStride, vertexBuffer);
         //获取片段着色器的 vColor 成员的句柄
         colorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
         //设置绘制三角形的颜色
         GLES20.glUniform4fv(colorHandle, 1, color, 0);
+
+        /***************
+         **新增代码******
+         *************/
+        //获取形状变换矩阵的句柄
+        vPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
+        //将投影和视图转换传递给着色器
+        GLES20.glUniformMatrix4fv(vPMatrixHandle, 1, false, mvpMatrix, 0);
+
+        /***************
+         **新增代码******
+         *************/
+
+
         //画三角形
         GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, vertexCount);
         //禁用顶点数组

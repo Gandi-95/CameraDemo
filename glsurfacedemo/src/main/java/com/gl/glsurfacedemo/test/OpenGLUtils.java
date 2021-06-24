@@ -1,6 +1,7 @@
 package com.gl.glsurfacedemo.test;
 
 import android.opengl.GLES20;
+import android.util.Log;
 
 /**
  * @ClassName: OpenGLUtils
@@ -12,6 +13,8 @@ import android.opengl.GLES20;
  */
 public class OpenGLUtils {
 
+
+    private static final String TAG = "OpenGLUtils";
 
     /**
      *
@@ -31,6 +34,7 @@ public class OpenGLUtils {
             int[] status = new int[1];
             //调用getShaderIv ，传入GL_COMPILE_STATUS进行查询
             GLES20.glGetShaderiv(shaderObjectId, GLES20.GL_COMPILE_STATUS,status,0);
+            Log.i(TAG, "loadShader: status:"+status[0]);
             //等于0。则表示失败
             if (status[0] == 0){
                 //失败的话，需要释放资源，就是删除这个引用
@@ -38,6 +42,7 @@ public class OpenGLUtils {
                 return 0;
             }
         }
+        Log.i(TAG, "loadShader: shaderObjectId:"+shaderObjectId);
         return shaderObjectId;
     }
 
