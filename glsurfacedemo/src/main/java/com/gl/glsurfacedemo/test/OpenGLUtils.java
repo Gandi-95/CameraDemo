@@ -1,7 +1,13 @@
 package com.gl.glsurfacedemo.test;
 
+import android.content.Context;
 import android.opengl.GLES20;
 import android.util.Log;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 /**
  * @ClassName: OpenGLUtils
@@ -13,8 +19,28 @@ import android.util.Log;
  */
 public class OpenGLUtils {
 
-
     private static final String TAG = "OpenGLUtils";
+
+
+    public static String readRawShaderFile(Context context, int shareId) {
+        InputStream is = context.getResources().openRawResource(shareId);
+        BufferedReader br = new BufferedReader(new InputStreamReader(is));
+
+        String line;
+        StringBuffer sb = new StringBuffer();
+        try {
+
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+                sb.append("\n");
+            }
+
+            br.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return sb.toString();
+    }
 
     /**
      *
