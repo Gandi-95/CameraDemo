@@ -30,11 +30,13 @@ import java.util.List;
  */
 public class Camera2 {
 
+    private static final String TAG = "Camera2";
+
     Context mContext;
     CameraManager mCameraManager;
     Size mPreviewSize;
     int mCameraId;
-    TextureView mTextureView;
+    SurfaceTexture mSurfaceTexture;
 
     private Handler mHandler;
     private HandlerThread mThreadHandler;
@@ -43,21 +45,39 @@ public class Camera2 {
     CaptureRequest.Builder mPreviewBuilder;
     CameraCaptureSession mCameraCaptureSession;
 
-    public Camera2(Context context, int cameraId, TextureView textureView) {
+    public Camera2(Context context){
         mContext = context;
+        init();
+    }
 
-        mPreviewSize = new Size(1280,720);
+    public Camera2(Context context, int cameraId, SurfaceTexture surfaceTexture) {
+        mContext = context;
+        init();
+
         mCameraId = cameraId;
-        mTextureView = textureView;
-
-
-        mThreadHandler = new HandlerThread("CAMERA2");
-        mThreadHandler.start();
-        mHandler = new Handler(mThreadHandler.getLooper());
+        mSurfaceTexture = surfaceTexture;
 
 
     }
 
+    public void setCameraId(int mCameraId) {
+        this.mCameraId = mCameraId;
+    }
+
+    public void setSurfaceTexture(SurfaceTexture mSurfaceTexture) {
+        this.mSurfaceTexture = mSurfaceTexture;
+    }
+
+    private void init(){
+        mPreviewSize = new Size(1280,720);
+        mThreadHandler = new HandlerThread("CAMERA2");
+        mThreadHandler.start();
+        mHandler = new Handler(mThreadHandler.getLooper());
+    }
+
+    public Size getPreviewSize() {
+        return mPreviewSize;
+    }
 
     @SuppressLint("MissingPermission")
     public void openCamera(){
@@ -90,11 +110,10 @@ public class Camera2 {
 
     private void startPreview(){
         try {
+            Log.i(TAG, "startPreview: ");
             List<Surface> surfaces = new ArrayList<Surface>();
-
-            SurfaceTexture surfaceTexture = mTextureView.getSurfaceTexture();
-            surfaceTexture.setDefaultBufferSize(mPreviewSize.getWidth(),mPreviewSize.getHeight());
-            Surface surface = new Surface(surfaceTexture);
+            mSurfaceTexture.setDefaultBufferSize(mPreviewSize.getWidth(),mPreviewSize.getHeight());
+            Surface surface = new Surface(mSurfaceTexture);
 
             mPreviewBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
             mPreviewBuilder.set(CaptureRequest.CONTROL_AE_MODE,0);
@@ -112,6 +131,7 @@ public class Camera2 {
     CameraCaptureSession.StateCallback mCameraCaptureSessionCallback = new CameraCaptureSession.StateCallback() {
         @Override
         public void onConfigured(CameraCaptureSession session) {
+            Log.i(TAG, "onConfigured: ");
             mCameraCaptureSession = session;
             updatePreview();
         }
@@ -127,6 +147,7 @@ public class Camera2 {
         try {
             mPreviewBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
             mPreviewBuilder.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_MODE_OFF);
+            mPreviewBuilder.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
             mPreviewBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON_AUTO_FLASH);
             mCameraCaptureSession.setRepeatingRequest(mPreviewBuilder.build(),null,mHandler);
         } catch (CameraAccessException e) {

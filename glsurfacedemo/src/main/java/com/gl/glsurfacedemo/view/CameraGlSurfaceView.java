@@ -3,6 +3,7 @@ package com.gl.glsurfacedemo.view;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
+import android.util.Log;
 
 import com.gl.glsurfacedemo.opengl.GdRenderer;
 import com.gl.glsurfacedemo.render.CameraRenderWrapper;
@@ -17,6 +18,8 @@ import com.gl.glsurfacedemo.render.CameraRenderWrapper;
  */
 public class CameraGlSurfaceView extends GLSurfaceView {
 
+    private static final String TAG = "CameraGlSurfaceView";
+
     CameraRenderWrapper mRender;
 
     public CameraGlSurfaceView(Context context) {
@@ -30,8 +33,9 @@ public class CameraGlSurfaceView extends GLSurfaceView {
     }
 
     private void init(){
+        Log.i(TAG, "init: ");
         setEGLContextClientVersion(2);
-        mRender = new CameraRenderWrapper();
+        mRender = new CameraRenderWrapper(this);
         setRenderer(mRender);
 
         setRenderMode(RENDERMODE_WHEN_DIRTY);

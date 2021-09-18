@@ -91,6 +91,25 @@ public class OpenGLUtils {
     }
 
 
+    public static void glGenTextures(int[] textures) {
+        GLES20.glGenTextures(textures.length, textures, 0);
+
+
+        for (int i = 0; i < textures.length; i++) {
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textures[i]);
+
+
+            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_NEAREST);
+            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
+
+
+            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_REPEAT);
+            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_REPEAT);
+
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
+
+        }
+    }
 
 }
 
